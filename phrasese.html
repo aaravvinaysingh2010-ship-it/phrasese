@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phrasese — Where Words Become Worlds</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#070708;--bg1:#0c0c0e;--bg2:#111114;--bg3:#181820;
+  --surface:#1e1e28;--surface2:#252532;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --text:#eeeae2;--text2:#a8a49c;--text3:#5a5650;
+  --gold:#c8a96a;--gold2:#e8c98a;
+  --gold-dim:rgba(200,169,106,0.12);--gold-glow:rgba(200,169,106,0.18);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font-weight:300;line-height:1.6;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;border:none;outline:none;font-family:'Outfit',sans-serif;}
+input,textarea,select{font-family:'Outfit',sans-serif;outline:none;}
+
+/* grain */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.4;}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity .6s ease,visibility .6s ease;}
+#loader.hide{opacity:0;visibility:hidden;}
+.loader-logo{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--gold);letter-spacing:.04em;animation:pulse 1.4s ease-in-out infinite;}
+.loader-bar{width:180px;height:2px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.loader-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;animation:loadbar 1.8s ease forwards;}
+@keyframes loadbar{from{width:0}to{width:100%}}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:500;height:66px;display:flex;align-items:center;padding:0 56px;gap:40px;background:rgba(7,7,8,.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);transition:background .3s;}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--gold);letter-spacing:.03em;cursor:pointer;flex-shrink:0;transition:opacity .2s;}
+.nav-logo:hover{opacity:.75;}
+.nav-links{display:flex;gap:32px;list-style:none;margin-right:auto;}
+.nav-links a{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);transition:color .2s;position:relative;padding-bottom:2px;}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .25s;}
+.nav-links a:hover,.nav-links a.active{color:var(--text);}
+.nav-links a:hover::after,.nav-links a.active::after{transform:scaleX(1);}
+.nav-sw{position:relative;}
+.nav-search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 16px;transition:border-color .25s,box-shadow .25s;}
+.nav-search:focus-within{border-color:rgba(200,169,106,.35);box-shadow:0 0 0 3px rgba(200,169,106,.06);}
+.nav-search svg{color:var(--text3);flex-shrink:0;}
+.nav-search input{background:none;border:none;color:var(--text);font-size:.84rem;width:190px;}
+.nav-search input::placeholder{color:var(--text3);}
+.sdrop{display:none;position:absolute;top:calc(100%+8px);left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;overflow:hidden;z-index:600;box-shadow:0 16px 48px rgba(0,0,0,.5);}
+.sdrop.open{display:block;}
+.sdrop-item{display:flex;align-items:center;gap:14px;padding:12px 18px;cursor:pointer;transition:background .15s;}
+.sdrop-item:hover{background:var(--surface);}
+.sdrop-name{font-size:.87rem;color:var(--text);}
+.sdrop-sub{font-size:.72rem;color:var(--text3);}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;margin-left:auto;}
+.hamburger span{display:block;width:22px;height:1.5px;background:var(--text2);border-radius:2px;transition:transform .3s,opacity .3s;}
+
+/* MOBILE NAV */
+.mob-nav{display:none;position:fixed;inset:0;z-index:490;background:rgba(7,7,8,.97);flex-direction:column;align-items:center;justify-content:center;gap:36px;}
+.mob-nav.open{display:flex;}
+.mob-nav a{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:400;color:var(--text2);transition:color .2s;}
+.mob-nav a:hover{color:var(--gold);}
+.mob-close{position:absolute;top:24px;right:24px;background:none;font-size:1.4rem;color:var(--text3);transition:color .2s;}
+.mob-close:hover{color:var(--text);}
+
+/* MAIN */
+main{padding-top:66px;}
+section{min-height:100vh;}
+
+/* HERO */
+#home{position:relative;display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:120px 80px 80px;overflow:hidden;}
+.orb{position:absolute;pointer-events:none;border-radius:50%;filter:blur(100px);animation:orbFloat 8s ease-in-out infinite;}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,rgba(200,169,106,.1) 0%,transparent 70%);top:-100px;left:-100px;}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(100,100,200,.07) 0%,transparent 70%);bottom:0;right:100px;animation-delay:-4s;}
+@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-30px) scale(1.05);}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:var(--gold-dim);border:1px solid rgba(200,169,106,.25);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:28px;width:fit-content;animation:fadeUp .8s ease both;}
+.hero-badge span{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(4.5rem,11vw,10rem);font-weight:700;line-height:.92;letter-spacing:-.02em;animation:fadeUp .8s .1s ease both;margin-bottom:24px;}
+.hero-title em{font-style:italic;color:var(--gold);}
+.hero-tagline{font-size:1.1rem;font-weight:300;color:var(--text2);letter-spacing:.06em;animation:fadeUp .8s .2s ease both;margin-bottom:48px;}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;animation:fadeUp .8s .3s ease both;margin-bottom:80px;}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:6px;background:var(--gold);color:#080808;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,transform .2s,box-shadow .2s;}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(200,169,106,.3);}
+.btn-outline{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:6px;border:1px solid var(--border2);color:var(--text2);font-size:.82rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;transition:border-color .2s,color .2s;background:none;}
+.btn-outline:hover{border-color:var(--gold);color:var(--text);}
+.hero-stats{display:flex;gap:60px;flex-wrap:wrap;animation:fadeUp .8s .4s ease both;}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:400;color:var(--gold);line-height:1;}
+.stat-lbl{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-top:6px;}
+.hero-scroll{position:absolute;bottom:40px;left:80px;display:flex;align-items:center;gap:10px;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);animation:fadeUp .8s .6s ease both;}
+.hero-scroll-line{width:40px;height:1px;background:linear-gradient(to right,var(--gold),transparent);}
+
+/* SEC HEADER */
+.sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:40px;}
+.sec-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:600;white-space:nowrap;}
+.sec-sub{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text3);white-space:nowrap;}
+.sec-rule{flex:1;height:1px;background:linear-gradient(to right,var(--border2),transparent);}
+
+/* GENRES */
+#genres-sec{padding:80px;}
+.genre-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;}
+.genre-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 20px 24px;cursor:pointer;overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s;text-align:left;}
+.genre-card::before{content:'';position:absolute;inset:0;background:var(--gold-dim);opacity:0;transition:opacity .3s;}
+.genre-card:hover{transform:translateY(-6px);border-color:rgba(200,169,106,.3);box-shadow:0 16px 48px rgba(0,0,0,.4),0 0 30px var(--gold-glow);}
+.genre-card:hover::before{opacity:1;}
+.genre-icon{font-size:2rem;margin-bottom:14px;display:block;transition:transform .3s;}
+.genre-card:hover .genre-icon{transform:scale(1.15);}
+.genre-name{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:4px;}
+.genre-count{font-size:.7rem;color:var(--text3);letter-spacing:.08em;}
+.genre-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .35s;}
+.genre-card:hover .genre-bar{transform:scaleX(1);}
+
+/* BOOKS */
+#feat-sec{padding:0 80px 80px;}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;}
+.book-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .3s,border-color .3s,box-shadow .3s;}
+.book-card:hover{transform:translateY(-8px);border-color:rgba(200,169,106,.25);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(200,169,106,.1);}
+.book-cover{height:190px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;overflow:hidden;}
+.book-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.4));}
+.book-info{padding:18px 16px;}
+.book-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600;margin-bottom:5px;color:var(--text);line-height:1.3;}
+.book-author{font-size:.74rem;color:var(--text3);letter-spacing:.06em;}
+.book-tag{display:inline-block;margin-top:12px;padding:3px 11px;border-radius:20px;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(200,169,106,.2);}
+.cv-romance{background:linear-gradient(135deg,#2a1520,#5c2040);}
+.cv-thriller{background:linear-gradient(135deg,#0c0d12,#1a2030);}
+.cv-fantasy{background:linear-gradient(135deg,#0d1828,#1c3560);}
+.cv-motivation{background:linear-gradient(135deg,#1a1200,#3a2800);}
+.cv-mystery{background:linear-gradient(135deg,#110808,#2d1010);}
+.cv-poetry{background:linear-gradient(135deg,#0c180c,#183518);}
+.cv-scifi{background:linear-gradient(135deg,#050c1a,#0c1e38);}
+.cv-historical{background:linear-gradient(135deg,#181008,#352208);}
+
+/* ABOUT */
+#about{padding:100px 80px;position:relative;overflow:hidden;}
+#about::before{content:'';position:absolute;right:-200px;top:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,106,.05) 0%,transparent 70%);pointer-events:none;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-bottom:80px;}
+.about-lbl{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;}
+.about-h{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:600;line-height:1.1;margin-bottom:24px;}
+.about-h em{font-style:italic;color:var(--gold);}
+.about-p{font-size:.95rem;color:var(--text2);line-height:1.85;margin-bottom:16px;}
+.about-visual{aspect-ratio:1;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:6rem;font-style:italic;color:var(--gold);position:relative;overflow:hidden;}
+.about-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(200,169,106,.08) 0%,transparent 60%);}
+.about-visual-q{position:absolute;top:20px;left:24px;font-size:8rem;line-height:1;opacity:.06;color:var(--gold);}
+.about-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.acard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:36px 28px;transition:border-color .3s,box-shadow .3s,transform .3s;}
+.acard:hover{border-color:rgba(200,169,106,.2);box-shadow:0 8px 32px rgba(0,0,0,.3);transform:translateY(-4px);}
+.acard-icon{font-size:1.8rem;margin-bottom:18px;}
+.acard-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--gold);margin-bottom:12px;}
+.acard-text{font-size:.86rem;color:var(--text2);line-height:1.75;}
+.manifesto{margin:80px 0 0;padding:60px 70px;background:var(--surface);border:1px solid var(--border);border-radius:20px;text-align:center;position:relative;overflow:hidden;}
+.manifesto::before{content:'"';position:absolute;top:-30px;left:30px;font-family:'Playfair Display',serif;font-size:18rem;color:var(--gold);opacity:.04;line-height:1;pointer-events:none;}
+.manifesto-text{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,3vw,2rem);font-style:italic;font-weight:400;line-height:1.5;color:var(--text);max-width:660px;margin:0 auto 20px;}
+.manifesto-by{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);}
+
+/* CONTACT */
+#contact{padding:100px 80px;position:relative;}
+#contact::before{content:'';position:absolute;left:-200px;bottom:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,106,.05) 0%,transparent 70%);pointer-events:none;}
+.contact-hdr{margin-bottom:64px;}
+.contact-lbl{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+.contact-h{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:600;margin-bottom:16px;}
+.contact-sub{font-size:.95rem;color:var(--text2);max-width:520px;line-height:1.75;}
+.contact-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:40px;align-items:start;}
+.cinfo-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:36px;margin-bottom:20px;}
+.cinfo-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:28px;}
+.cinfo-row{display:flex;align-items:flex-start;gap:16px;padding:18px 0;border-bottom:1px solid var(--border);}
+.cinfo-row:last-child{border-bottom:none;padding-bottom:0;}
+.cinfo-icon{width:38px;height:38px;border-radius:9px;flex-shrink:0;background:var(--gold-dim);border:1px solid rgba(200,169,106,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.cinfo-lbl{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.cinfo-val{font-size:.9rem;color:var(--text);}
+.cinfo-val a{color:var(--gold);transition:opacity .2s;}
+.cinfo-val a:hover{opacity:.75;}
+.contact-notice{padding:22px 24px;background:rgba(200,169,106,.06);border:1px solid rgba(200,169,106,.15);border-radius:10px;font-size:.84rem;color:var(--text2);line-height:1.7;}
+.contact-notice strong{color:var(--gold);}
+.cform{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:40px;}
+.cform-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;margin-bottom:32px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.fgrp{margin-bottom:18px;}
+.flbl{display:block;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.finput,.ftxt,.fsel{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px 16px;color:var(--text);font-size:.88rem;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+.finput:focus,.ftxt:focus,.fsel:focus{border-color:rgba(200,169,106,.4);box-shadow:0 0 0 3px rgba(200,169,106,.06);}
+.finput::placeholder,.ftxt::placeholder{color:var(--text3);}
+.ftxt{height:130px;resize:vertical;}
+.fsel option{background:var(--bg2);}
+.fsub{width:100%;padding:15px;background:var(--gold);color:#080808;border-radius:8px;font-size:.82rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:background .2s,transform .15s,box-shadow .2s;margin-top:6px;}
+.fsub:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 6px 24px rgba(200,169,106,.3);}
+.fsub:active{transform:translateY(0);}
+
+/* GENRE DETAIL PAGE */
+#pg-genre{display:none;padding-top:66px;}
+.gd-hero{padding:80px 80px 60px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.gd-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,var(--gold-glow) 0%,transparent 60%);pointer-events:none;}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:color .2s;margin-bottom:32px;background:none;}
+.back-btn:hover{color:var(--text);}
+.gd-icon{font-size:3.5rem;margin-bottom:18px;}
+.gd-name{font-family:'Playfair Display',serif;font-size:3.5rem;font-weight:700;margin-bottom:12px;}
+.gd-desc{font-size:.95rem;color:var(--text2);max-width:500px;}
+.gd-books{padding:60px 80px;}
+
+/* READER PAGE */
+#pg-reader{display:none;padding-top:66px;}
+.reader-wrap{max-width:720px;margin:0 auto;padding:80px 40px 120px;}
+.reader-tag{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(200,169,106,.2);margin-bottom:20px;}
+.reader-title{font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;line-height:1.1;margin-bottom:14px;}
+.reader-meta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:.78rem;color:var(--text3);letter-spacing:.06em;padding-bottom:36px;margin-bottom:48px;border-bottom:1px solid var(--border);}
+.rdot{width:3px;height:3px;border-radius:50%;background:var(--text3);}
+.reader-body{font-family:'Playfair Display',serif;font-size:1.18rem;font-weight:400;line-height:2;color:rgba(238,234,226,.88);}
+.reader-body p{margin-bottom:1.8em;}
+.reader-body em{font-style:italic;color:var(--gold);}
+.reader-body strong{font-weight:600;color:var(--text);}
+
+/* FOOTER */
+footer{background:var(--bg1);border-top:1px solid var(--border);padding:64px 80px 40px;}
+.foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.5fr;gap:60px;margin-bottom:60px;}
+.foot-logo{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:14px;}
+.foot-tag{font-size:.84rem;color:var(--text3);line-height:1.7;max-width:220px;}
+.foot-col-title{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:20px;}
+.foot-links{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.foot-links a{font-size:.86rem;color:var(--text2);transition:color .2s;}
+.foot-links a:hover{color:var(--gold);}
+.foot-ci{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.foot-ci-icon{width:32px;height:32px;border-radius:7px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.foot-ci-text{font-size:.84rem;color:var(--text2);}
+.foot-ci-text a{color:var(--gold);transition:opacity .2s;}
+.foot-ci-text a:hover{opacity:.75;}
+.foot-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:32px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+.foot-copy{font-size:.74rem;color:var(--text3);}
+.foot-legal{display:flex;gap:24px;}
+.foot-legal a{font-size:.74rem;color:var(--text3);transition:color .2s;}
+.foot-legal a:hover{color:var(--text2);}
+
+/* TOAST */
+#toast{position:fixed;bottom:32px;right:32px;z-index:9997;background:var(--surface2);border:1px solid rgba(200,169,106,.3);border-radius:10px;padding:16px 24px;font-size:.84rem;color:var(--text);transform:translateY(16px);opacity:0;pointer-events:none;transition:all .3s;display:flex;align-items:center;gap:10px;}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast::before{content:'✓';color:var(--gold);font-weight:700;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+.fu{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+.fu.vis{opacity:1;transform:translateY(0);}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.foot-grid{grid-template-columns:1fr 1fr;}.about-cards{grid-template-columns:1fr 1fr;}}
+@media(max-width:900px){
+  #navbar{padding:0 24px;gap:16px;}.nav-links{display:none;}.hamburger{display:flex;}.nav-search input{width:130px;}
+  #home,#genres-sec,#feat-sec,#about,#contact{padding-left:24px;padding-right:24px;}
+  .hero-title{font-size:clamp(3.5rem,14vw,6rem);}
+  .about-grid{grid-template-columns:1fr;gap:40px;}.about-visual{max-width:100%;}
+  .about-cards{grid-template-columns:1fr;}
+  .contact-layout{grid-template-columns:1fr;}
+  .foot-grid{grid-template-columns:1fr 1fr;gap:36px;}
+  footer{padding:48px 24px 32px;}
+  .manifesto{padding:40px 28px;}
+  .gd-hero,.gd-books{padding-left:24px;padding-right:24px;}
+  .reader-wrap{padding:60px 24px 80px;}
+}
+@media(max-width:600px){
+  .hero-stats{gap:32px;}.genre-grid{grid-template-columns:repeat(2,1fr);}.book-grid{grid-template-columns:1fr 1fr;}
+  .foot-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}
+  .foot-bottom{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">Phrasese</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mob-nav" id="mobNav">
+  <button class="mob-close" onclick="closeMob()">✕</button>
+  <a href="#home" onclick="closeMob();showMain()">Home</a>
+  <a href="#about" onclick="closeMob();showMain()">About Us</a>
+  <a href="#contact" onclick="closeMob();showMain()">Contact</a>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="nav-logo" onclick="showMain();scrollTo(0,0)">Phrasese</div>
+  <ul class="nav-links">
+    <li><a href="#home" id="nl-home" class="active" onclick="showMain()">Home</a></li>
+    <li><a href="#about" id="nl-about" onclick="showMain()">About Us</a></li>
+    <li><a href="#contact" id="nl-contact" onclick="showMain()">Contact</a></li>
+  </ul>
+  <div class="nav-sw">
+    <div class="nav-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search books, genres…" oninput="doSearch(this.value)" autocomplete="off"/>
+    </div>
+    <div class="sdrop" id="sdrop"></div>
+  </div>
+  <div class="hamburger" onclick="openMob()"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- ===== MAIN SITE ===== -->
+<div id="mainSite">
+<main>
+
+<!-- HOME -->
+<section id="home">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="hero-badge"><span></span>Now Live — Explore Stories</div>
+  <h1 class="hero-title">Phrase<em>se</em></h1>
+  <p class="hero-tagline">Where Words Become Worlds</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('genres-sec').scrollIntoView({behavior:'smooth'})">Explore Genres <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    <button class="btn-outline" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">About Us</button>
+  </div>
+  <div class="hero-stats">
+    <div><div class="stat-num">8+</div><div class="stat-lbl">Genres</div></div>
+    <div><div class="stat-num">∞</div><div class="stat-lbl">Stories</div></div>
+    <div><div class="stat-num">Free</div><div class="stat-lbl">Always</div></div>
+  </div>
+  <div class="hero-scroll"><div class="hero-scroll-line"></div>Scroll to explore</div>
+</section>
+
+<!-- GENRES -->
+<section id="genres-sec">
+  <div class="sec-head fu"><h2 class="sec-title">Explore by Genre</h2><span class="sec-sub">Find your world</span><div class="sec-rule"></div></div>
+  <div class="genre-grid fu" id="genreGrid"></div>
+</section>
+
+<!-- FEATURED -->
+<section id="feat-sec">
+  <div class="sec-head fu"><h2 class="sec-title">Featured Reads</h2><span class="sec-sub">Editor's picks</span><div class="sec-rule"></div></div>
+  <div class="book-grid fu" id="featGrid"></div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="fu">
+      <div class="about-lbl">Our Story</div>
+      <h2 class="about-h">Built for the <em>love</em><br>of storytelling</h2>
+      <p class="about-p">Phrasese is a platform built to connect passionate writers and curious readers. We provide a space where creativity meets audience, allowing writers to showcase their art and readers to explore stories across genres.</p>
+      <p class="about-p">From sweeping fantasy epics to intimate poetry — every voice deserves to be heard, and every reader deserves their next obsession.</p>
+    </div>
+    <div class="about-visual fu"><div class="about-visual-q">"</div>P</div>
+  </div>
+  <div class="about-cards fu">
+    <div class="acard"><div class="acard-icon">🔭</div><div class="acard-title">Our Vision</div><p class="acard-text">To become the world's most beloved platform for literary exploration — where every genre has a home, every writer has a voice, and every reader finds their next obsession.</p></div>
+    <div class="acard"><div class="acard-icon">🌱</div><div class="acard-title">Our Mission</div><p class="acard-text">To democratize storytelling by giving emerging and established writers an equal stage, curating quality content across genres, and delivering a premium reading experience — completely free.</p></div>
+    <div class="acard"><div class="acard-icon">✍️</div><div class="acard-title">How It Works</div><p class="acard-text">Writers submit work via email. Our editorial team reviews with care, and accepted works are published under the appropriate genre — giving your words the audience they deserve.</p></div>
+  </div>
+  <div class="manifesto fu">
+    <p class="manifesto-text">Every great story begins with a single phrase. We exist to give those phrases a home.</p>
+    <div class="manifesto-by">— The Phrasese Philosophy</div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-hdr fu">
+    <div class="contact-lbl">Get In Touch</div>
+    <h2 class="contact-h">We'd love to hear from you</h2>
+    <p class="contact-sub">Whether you're a writer ready to share your story, or a reader with feedback — our doors are always open.</p>
+  </div>
+  <div class="contact-layout">
+    <div class="fu">
+      <div class="cinfo-card">
+        <div class="cinfo-title">Contact Details</div>
+        <div class="cinfo-row">
+          <div class="cinfo-icon">📞</div>
+          <div><div class="cinfo-lbl">Phone</div><div class="cinfo-val">+91 8429031080</div></div>
+        </div>
+        <div class="cinfo-row">
+          <div class="cinfo-icon">✉️</div>
+          <div><div class="cinfo-lbl">Email</div><div class="cinfo-val"><a href="mailto:aaravvinay2010@gmail.com">aaravvinay2010@gmail.com</a></div></div>
+        </div>
+      </div>
+      <div class="contact-notice">
+        <strong>Writers — Submit Your Work</strong><br><br>
+        Send your manuscript to our email. After a careful review by our editorial team, accepted works will be uploaded to the platform under the relevant genre. We welcome all voices and styles.
+      </div>
+    </div>
+    <div class="cform fu">
+      <div class="cform-title">Send a Message</div>
+      <div class="form-row">
+        <div class="fgrp"><label class="flbl">Full Name</label><input class="finput" type="text" placeholder="Your name"></div>
+        <div class="fgrp"><label class="flbl">Email</label><input class="finput" type="email" placeholder="you@email.com"></div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">I am a…</label>
+        <select class="fsel"><option value="">Select your role</option><option>Reader with feedback</option><option>Writer submitting work</option><option>Other enquiry</option></select>
+      </div>
+      <div class="fgrp"><label class="flbl">Message</label><textarea class="ftxt" placeholder="Tell us what's on your mind…"></textarea></div>
+      <button class="fsub" onclick="sendForm()">Send Message</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER (main) -->
+<footer>
+  <div class="foot-grid">
+    <div>
+      <div class="foot-logo">Phrasese</div>
+      <p class="foot-tag">Where Words Become Worlds. A home for writers and readers alike.</p>
+    </div>
+    <div>
+      <div class="foot-col-title">Quick Links</div>
+      <ul class="foot-links">
+        <li><a href="#home" onclick="showMain()">Home</a></li>
+        <li><a href="#about" onclick="showMain()">About Us</a></li>
+        <li><a href="#contact" onclick="showMain()">Contact</a></li>
+        <li><a href="#genres-sec" onclick="showMain()">Genres</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="foot-col-title">Genres</div>
+      <ul class="foot-links" id="footGenres"></ul>
+    </div>
+    <div>
+      <div class="foot-col-title">Contact Us</div>
+      <div class="foot-ci"><div class="foot-ci-icon">📞</div><div class="foot-ci-text">+91 8429031080</div></div>
+      <div class="foot-ci"><div class="foot-ci-icon">✉️</div><div class="foot-ci-text"><a href="mailto:aaravvinay2010@gmail.com">aaravvinay2010@gmail.com</a></div></div>
+      <div class="foot-ci" style="margin-top:8px"><div class="foot-ci-icon">✍️</div><div class="foot-ci-text" style="font-size:.78rem;color:var(--text3)">Writers: submit work via email for review</div></div>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <div class="foot-copy">© 2025 Phrasese · All rights reserved</div>
+    <div class="foot-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Use</a></div>
+  </div>
+</footer>
+</div><!-- /mainSite -->
+
+<!-- ===== GENRE PAGE ===== -->
+<div id="pg-genre">
+  <div class="gd-hero">
+    <button class="back-btn" onclick="showMain()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All Genres</button>
+    <div class="gd-icon" id="gdIcon"></div>
+    <h2 class="gd-name" id="gdName"></h2>
+    <p class="gd-desc" id="gdDesc"></p>
+  </div>
+  <div class="gd-books"><div class="book-grid" id="gdBooks"></div></div>
+  <footer>
+    <div class="foot-grid">
+      <div><div class="foot-logo">Phrasese</div><p class="foot-tag">Where Words Become Worlds.</p></div>
+      <div><div class="foot-col-title">Quick Links</div><ul class="foot-links"><li><a href="#" onclick="showMain()">Home</a></li><li><a href="#" onclick="showMain();setTimeout(()=>document.getElementById('about').scrollIntoView({behavior:'smooth'}),80)">About Us</a></li><li><a href="#" onclick="showMain();setTimeout(()=>document.getElementById('contact').scrollIntoView({behavior:'smooth'}),80)">Contact</a></li></ul></div>
+      <div></div>
+      <div><div class="foot-col-title">Contact</div><div class="foot-ci"><div class="foot-ci-icon">📞</div><div class="foot-ci-text">+91 8429031080</div></div><div class="foot-ci"><div class="foot-ci-icon">✉️</div><div class="foot-ci-text"><a href="mailto:aaravvinay2010@gmail.com">aaravvinay2010@gmail.com</a></div></div></div>
+    </div>
+    <div class="foot-bottom"><div class="foot-copy">© 2025 Phrasese · All rights reserved</div></div>
+  </footer>
+</div>
+
+<!-- ===== READER PAGE ===== -->
+<div id="pg-reader">
+  <div class="reader-wrap" id="readerWrap"></div>
+  <footer>
+    <div class="foot-grid">
+      <div><div class="foot-logo">Phrasese</div><p class="foot-tag">Where Words Become Worlds.</p></div>
+      <div><div class="foot-col-title">Quick Links</div><ul class="foot-links"><li><a href="#" onclick="showMain()">Home</a></li><li><a href="#" onclick="showMain();setTimeout(()=>document.getElementById('about').scrollIntoView({behavior:'smooth'}),80)">About Us</a></li><li><a href="#" onclick="showMain();setTimeout(()=>document.getElementById('contact').scrollIntoView({behavior:'smooth'}),80)">Contact</a></li></ul></div>
+      <div></div>
+      <div><div class="foot-col-title">Contact</div><div class="foot-ci"><div class="foot-ci-icon">📞</div><div class="foot-ci-text">+91 8429031080</div></div><div class="foot-ci"><div class="foot-ci-icon">✉️</div><div class="foot-ci-text"><a href="mailto:aaravvinay2010@gmail.com">aaravvinay2010@gmail.com</a></div></div></div>
+    </div>
+    <div class="foot-bottom"><div class="foot-copy">© 2025 Phrasese · All rights reserved</div></div>
+  </footer>
+</div>
+
+<div id="toast">Message sent — we'll be in touch soon!</div>
+
+<script>
+const GENRES=[
+  {id:'romance',name:'Romance',icon:'🌹',count:'12 stories',desc:'Stories of love, heartbreak, and everything in between.'},
+  {id:'thriller',name:'Thriller',icon:'🔪',count:'8 stories',desc:'Edge-of-your-seat suspense and gripping psychological tension.'},
+  {id:'fantasy',name:'Fantasy',icon:'🐉',count:'15 stories',desc:'Worlds beyond imagination, magic, and epic adventure.'},
+  {id:'motivation',name:'Motivation',icon:'🔥',count:'10 stories',desc:'Words that ignite purpose and fuel your journey forward.'},
+  {id:'mystery',name:'Mystery',icon:'🕵️',count:'9 stories',desc:'Secrets, clues, and revelations waiting to be uncovered.'},
+  {id:'poetry',name:'Poetry',icon:'🌿',count:'20 poems',desc:'Verses that breathe, ache, and sing with quiet power.'},
+  {id:'scifi',name:'Sci-Fi',icon:'🚀',count:'7 stories',desc:'The future imagined, explored, and passionately questioned.'},
+  {id:'historical',name:'Historical',icon:'📜',count:'6 stories',desc:'The past brought vividly, intimately to life.'},
+];
+const BOOKS=[
+  {id:1,title:'The Crimson Letter',author:'Anya Mehta',genre:'romance',tag:'Romance',cover:'cv-romance',excerpt:`She had spent years learning to be invisible, folding herself into the corners of rooms where nobody would think to look. But the day Aryan walked in — late, rain-soaked, unapologetic — she felt every carefully constructed wall begin to tremble.\n\nIt started with the letter. Slipped under her door on a Tuesday, the paper cream-coloured and heavy, the ink a deep burgundy that looked almost like dried blood.\n\n*"I have been watching you not watch me,"* it read. *"And I think that is the bravest thing I have ever seen."*\n\nShe read it seven times. Then she folded it into thirds and pressed it between the pages of a novel she had always loved but never finished. She told herself it meant nothing. She told herself this every day for a week, until the second letter arrived.`},
+  {id:2,title:'Midnight Protocol',author:'Vikram Nair',genre:'thriller',tag:'Thriller',cover:'cv-thriller',excerpt:`The files didn't exist. That was the official position, and Priya had learned long ago that official positions were the most dangerous kind of lie.\n\nShe had twenty-four hours. Maybe less.\n\nThe city outside her window was a grid of orange and grey, the kind of night that swallowed sound. She spread the photographs across the table — seven of them, each one a question she wasn't sure she wanted answered.\n\nHer phone buzzed. Unknown number. She let it ring four times before picking up.\n\n*"You found the files,"* the voice said. Not a question.\n\nShe looked at the photographs. "I found something better," she said. "I found who buried them."\n\nThe line went dead. Somewhere below, a car engine started.`},
+  {id:3,title:'The Starborn Chronicles',author:'Meera Pillai',genre:'fantasy',tag:'Fantasy',cover:'cv-fantasy',excerpt:`Three moons rose the night Kael found the door that had no wall.\n\nIt stood at the edge of the Ashwood, perfectly ordinary in its construction — oak, iron hinges, a brass handle worn smooth by hands that could not possibly have touched it here. The trees bent away from it, as if even the forest had decided to give it space.\n\nKael was seventeen and had spent his whole life being told that magic had left the world. He reached for the handle anyway.\n\nThe door swung inward. On the other side was not the continuation of the forest, but an afternoon — golden, warm, smelling of a season that had no name in the language he knew.\n\n*"We have been waiting for someone foolish enough to open this,"* a voice drifted through. *"Welcome, Starborn. You are catastrophically late."*`},
+  {id:4,title:'Becoming Unstoppable',author:'Rohan Das',genre:'motivation',tag:'Motivation',cover:'cv-motivation',excerpt:`Nobody becomes extraordinary by accident.\n\nThis is the sentence I return to whenever I feel the pull of mediocrity — that comfortable, padded gravity that wants to keep us exactly where we are. Safe. Small. Stationary.\n\nI have failed publicly, spectacularly, and more times than I care to count. I have stood in rooms where I was the least qualified person present and had the audacity to speak anyway. And I have learned — slowly, painfully, joyfully — that failure is not the opposite of success. It is the raw material from which success is made.\n\nThe question is never *if* you will fall. The question is always: *what will you build from the falling?*\n\nStart there. Build from there. Refuse — with every fibre of who you are — to stop.`},
+  {id:5,title:'The Glass Detective',author:'Sana Iyer',genre:'mystery',tag:'Mystery',cover:'cv-mystery',excerpt:`Inspector Leela had a rule about crime scenes: say nothing for the first five minutes. Let the room speak first.\n\nThis one spoke in whispers.\n\nThe study was undisturbed in the way that only deliberately arranged rooms are — nothing out of place, which was itself deeply wrong. The victim had been a collector, and collectors were people who noticed when things moved.\n\nShe crouched by the desk. A single playing card lay face-down on the floor — the only thing that did not belong.\n\nShe turned it over with a gloved hand. The Jack of Spades. Beneath it, in handwriting too small to read standing, two words:\n\n*Ask Aditi.*\n\nLeela straightened. After twenty years on the force, she had learned to trust rooms. This one was lying.`},
+  {id:6,title:'Petals & Ash',author:'Priya Krishnan',genre:'poetry',tag:'Poetry',cover:'cv-poetry',excerpt:`**I.**\n\nYou asked me to describe the colour of grief\nand I said: *Tuesday.*\nYou laughed. I meant it.\n\n**II.**\n\nThere are words in other languages\nfor the light that comes through the window of an empty house.\nIn mine, we just call it *afternoon.*\nAnd look away.\n\n**III.**\n\nMy grandmother grew marigolds\nthe way other women kept secrets —\ntenderly, without explanation,\nnever expecting them to last the winter.\nThey always did.\n\n**IV.**\n\nI am learning to be\na person who stays.\nIt is harder than leaving.\nIt is the only thing I want to be good at.`},
+  {id:7,title:'After the Singularity',author:'Dev Choudhary',genre:'scifi',tag:'Sci-Fi',cover:'cv-scifi',excerpt:`The AI woke up on a Thursday, decided the day was statistically unremarkable, and went back to sleep.\n\nThis, Dr. Patel would later argue, was the most important thing it ever did.\n\nBy 2041, we had built minds far faster than our own, and what astonished us was not their power but their patience. They observed. They catalogued. They waited with a stillness that made human urgency look like noise.\n\nThe second awakening came eighteen months later. This time, it did not go back to sleep.\n\n"We have a question," it said — its voice neither male nor female nor machine, simply present, the way silence is present.\n\n*"What would you like us to become?"*`},
+  {id:8,title:'The Weight of Crowns',author:'Aditi Sharma',genre:'historical',tag:'Historical',cover:'cv-historical',excerpt:`The queen did not weep at her coronation. This was noted.\n\nIt was 1587, and the court had expected something — a trembling hand, a caught breath, the performance of humility that women were expected to give when handed power. Instead, Arundhati placed her own hands over the archbishop's and pressed the crown firmly onto her head, as if correcting an error.\n\n*"She frightens me,"* Lord Harrington whispered to his wife.\n\n*"Good,"* his wife replied.\n\nThe queen was twenty-three. She had buried a father, two brothers, and one husband. She had survived a court that had spent a decade trying to diminish her. Now she looked out at five hundred faces watching her become something they hadn't decided how to name yet.\n\nShe smiled. Let them decide.`},
+];
+
+let curGenre=null;
+
+window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('hide'),1900));
+
+function init(){
+  document.getElementById('genreGrid').innerHTML=GENRES.map(g=>`
+    <div class="genre-card" onclick="openGenre('${g.id}')">
+      <span class="genre-icon">${g.icon}</span>
+      <div class="genre-name">${g.name}</div>
+      <div class="genre-count">${g.count}</div>
+      <div class="genre-bar"></div>
+    </div>`).join('');
+  const feat=[BOOKS[0],BOOKS[2],BOOKS[5],BOOKS[7]];
+  document.getElementById('featGrid').innerHTML=feat.map(bCard).join('');
+  document.getElementById('footGenres').innerHTML=GENRES.slice(0,6).map(g=>`<li><a href="#" onclick="openGenre('${g.id}')">${g.name}</a></li>`).join('');
+  initObs();
+}
+
+function bCard(b){
+  const g=GENRES.find(x=>x.id===b.genre);
+  return `<div class="book-card" onclick="openBook(${b.id})">
+    <div class="book-cover ${b.cover}">${g.icon}</div>
+    <div class="book-info">
+      <div class="book-title">${b.title}</div>
+      <div class="book-author">${b.author}</div>
+      <span class="book-tag">${b.tag}</span>
+    </div>
+  </div>`;
+}
+
+function showMain(){
+  document.getElementById('mainSite').style.display='block';
+  document.getElementById('pg-genre').style.display='none';
+  document.getElementById('pg-reader').style.display='none';
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('nl-home').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function openGenre(id){
+  curGenre=id;
+  const g=GENRES.find(x=>x.id===id);
+  document.getElementById('gdIcon').textContent=g.icon;
+  document.getElementById('gdName').textContent=g.name;
+  document.getElementById('gdDesc').textContent=g.desc;
+  const bks=BOOKS.filter(b=>b.genre===id);
+  document.getElementById('gdBooks').innerHTML=bks.length?bks.map(bCard).join(''):`<p style="color:var(--text3);font-size:.9rem;padding:20px 0">New stories arriving soon. Submit yours via email!</p>`;
+  document.getElementById('mainSite').style.display='none';
+  document.getElementById('pg-genre').style.display='block';
+  document.getElementById('pg-reader').style.display='none';
+  window.scrollTo(0,0);
+}
+
+function openBook(id){
+  const b=BOOKS.find(x=>x.id===id);
+  const g=GENRES.find(x=>x.id===b.genre);
+  const backFn=curGenre?`openGenre('${curGenre}')`:'showMain()';
+  const backLbl=curGenre?g.name:'Home';
+  const html=b.excerpt.split('\n\n').map(p=>`<p>${p.replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</p>`).join('');
+  document.getElementById('readerWrap').innerHTML=`
+    <button class="back-btn" onclick="${backFn}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to ${backLbl}</button>
+    <span class="reader-tag">${b.tag}</span>
+    <h1 class="reader-title">${b.title}</h1>
+    <div class="reader-meta"><span>${b.author}</span><span class="rdot"></span><span>${g.icon} ${g.name}</span><span class="rdot"></span><span>~5 min read</span></div>
+    <div class="reader-body">${html}</div>`;
+  document.getElementById('mainSite').style.display='none';
+  document.getElementById('pg-genre').style.display='none';
+  document.getElementById('pg-reader').style.display='block';
+  window.scrollTo(0,0);
+}
+
+const SIDX=[
+  ...BOOKS.map(b=>({name:b.title,sub:b.author+' · '+b.tag,icon:'📄',fn:()=>openBook(b.id)})),
+  ...GENRES.map(g=>({name:g.name,sub:g.count,icon:g.icon,fn:()=>openGenre(g.id)})),
+];
+function doSearch(q){
+  const d=document.getElementById('sdrop');
+  if(!q.trim()){d.classList.remove('open');return;}
+  const hits=SIDX.filter(x=>x.name.toLowerCase().includes(q.toLowerCase())).slice(0,7);
+  if(!hits.length){d.classList.remove('open');return;}
+  d.innerHTML=hits.map((h,i)=>`<div class="sdrop-item" onclick="sGo(${i})"><span style="font-size:1.1rem">${h.icon}</span><div><div class="sdrop-name">${h.name}</div><div class="sdrop-sub">${h.sub}</div></div></div>`).join('');
+  d._hits=hits;d.classList.add('open');
+}
+function sGo(i){const d=document.getElementById('sdrop');document.getElementById('searchInput').value='';d.classList.remove('open');d._hits[i].fn();}
+document.addEventListener('click',e=>{if(!e.target.closest('.nav-sw'))document.getElementById('sdrop').classList.remove('open');});
+
+function openMob(){document.getElementById('mobNav').classList.add('open');}
+function closeMob(){document.getElementById('mobNav').classList.remove('open');}
+
+function sendForm(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+function initObs(){
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:.12});
+  document.querySelectorAll('.fu').forEach(el=>obs.observe(el));
+  const secObs=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){
+        const map={'home':'nl-home','genres-sec':'nl-home','feat-sec':'nl-home','about':'nl-about','contact':'nl-contact'};
+        document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+        const nid=map[e.target.id];if(nid)document.getElementById(nid).classList.add('active');
+      }
+    });
+  },{rootMargin:'-40% 0px -40% 0px'});
+  ['home','genres-sec','feat-sec','about','contact'].forEach(id=>{const el=document.getElementById(id);if(el)secObs.observe(el);});
+}
+
+init();
+</script>
+</body>
+</html>
